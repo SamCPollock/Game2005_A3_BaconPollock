@@ -21,7 +21,7 @@ Bullet::~Bullet()
 void Bullet::reset()
 {
 	getRigidBody()->velocity = glm::vec2(0.0f, 0.0f);
-	getRigidBody()->acceleration = glm::vec2(0.0f, 9.8f * 2.0f);
+	getRigidBody()->acceleration = glm::vec2(0.0f, 0.0f);
 	getRigidBody()->isColliding = false;
 	std::cout << "DEBUG: BULLET DROPPING" << std::endl;
 }

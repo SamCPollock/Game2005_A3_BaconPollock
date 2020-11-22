@@ -23,7 +23,7 @@ Bullet* BulletPool::Spawn()
 	}
 	else
 	{
-		printf("error");
+		printf("Error: Unable to spawn new bullet!\n");
 	}
 
 	return bullet;
@@ -46,4 +46,28 @@ void BulletPool::Clean()
 	active.erase(std::remove_if(active.begin(), active.end(),
 		[](const Bullet* bullet)
 		{ return bullet->active == false; }), active.end());
+}
+
+void BulletPool::Resize(size_t new_size)
+{
+	if(new_size < active.size() + inactive.size())
+	{
+		if(new_size < active.size())
+		{
+			active.resize(new_size);
+			inactive.resize(0);
+		}
+		else
+		{
+			new_size -= active.size();
+			inactive.resize(new_size);
+		}
+	}
+	else
+	{
+		while(new_size > active.size() + inactive.size())
+		{
+			inactive.push_back(new Bullet);
+		}
+	}
 }

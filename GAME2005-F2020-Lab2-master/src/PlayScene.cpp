@@ -1,9 +1,10 @@
 #include "PlayScene.h"
 #include "Game.h"
 #include "EventManager.h"
-//#include "CollisionManager.h"
 #include "SoundManager.h"
 #include "Util.h"
+#include "imgui.h"
+#include "imgui_sdl.h"
 
 PlayScene::PlayScene()
 {
@@ -21,13 +22,15 @@ void PlayScene::draw()
 		TextureManager::Instance()->draw("broom", (hp * 20) - 10, 550, 90);
 		
 		hp_flashTimer = SDL_GetTicks() - hp_flashTimerStart;
-		if(hp_flashTimer < hp_flashTimerDuration && hp_flashTimer % hp_flashTimerPeriod < 500)
+		if((current_hp == 1 || hp_flashTimer < hp_flashTimerDuration) && hp_flashTimer % hp_flashTimerPeriod < 500)
 			TextureManager::Instance()->setColour("broom", 0, 0, 0);
 		else
 			TextureManager::Instance()->setColour("broom", 255, 255, 255);
 	}
 	drawDisplayList();
 
+	if(EventManager::Instance().isIMGUIActive())
+		GUI_Function();
 }
 
 void PlayScene::update()
@@ -65,6 +68,8 @@ void PlayScene::update()
 			--current_hp;
 			hp_flashTimerStart = SDL_GetTicks();
 			SoundManager::Instance().playSound("hit", 0, 1);
+			if(current_hp < 1)
+				TheGame::Instance()->changeSceneState(START_SCENE);
 		}
 		else if(bullet->getTransform()->position.y > 650)
 		{
@@ -131,7 +136,7 @@ void PlayScene::start()
 	m_pPlayer = new Player();
 	addChild(m_pPlayer);
 
-	m_pBulletPool = new BulletPool(10);
+	m_pBulletPool = new BulletPool(bulletPoolSize);
 	for(auto bullet : m_pBulletPool->inactive)
 	{
 		addChild(bullet);
@@ -140,10 +145,47 @@ void PlayScene::start()
 	const SDL_Color blue = { 0, 0, 255, 255 };
 }
 
+
 void PlayScene::SpawnBullet()
 {
 	Bullet* bullet = m_pBulletPool->Spawn();
 	if(bullet)
+	{
 		bullet->getTransform()->position = glm::vec2(50 + rand() % 700, 0);
+		bullet->getRigidBody()->acceleration = glm::vec2(wind, gravity * gravityScale);
+	}
 	bulletSpawnTimerStart = SDL_GetTicks();
+}
+
+void PlayScene::GUI_Function()
+{
+	ImGui::NewFrame();
+	ImGui::Begin("Options", NULL, ImGuiWindowFlags_MenuBar);
+	ImGui::SetWindowSize({ 340, 0 });
+
+	if(ImGui::SliderInt("Brooms", &current_hp, 1, 40));
+	if(ImGui::SliderInt("Raindrops", &bulletPoolSize, 1, 200))
+	{
+		for(Bullet* bullet : m_pBulletPool->active) removeChild(bullet, false);
+		for(Bullet* bullet : m_pBulletPool->inactive) removeChild(bullet, false);
+		m_pBulletPool->Resize(bulletPoolSize);
+		for(Bullet* bullet : m_pBulletPool->active) addChild(bullet);
+		for(Bullet* bullet : m_pBulletPool->inactive) addChild(bullet);
+	}
+	if(ImGui::SliderFloat("Rain Period", &bulletSpawnDuration, 5000.0f, 100.0f));
+	if(ImGui::SliderFloat("Gravity", &gravity, 1.0f, 100.0f))
+	{
+		for(Bullet* bullet : m_pBulletPool->active) bullet->getRigidBody()->acceleration.y = gravity * gravityScale;
+		for(Bullet* bullet : m_pBulletPool->inactive) bullet->getRigidBody()->acceleration.y = gravity * gravityScale;
+	}
+	if(ImGui::SliderFloat("Wind", &wind, -50.0f, 50.0f))
+	{
+		for(Bullet* bullet : m_pBulletPool->active) bullet->getRigidBody()->acceleration.x = wind;
+		for(Bullet* bullet : m_pBulletPool->inactive) bullet->getRigidBody()->acceleration.x = wind;
+	}
+
+	ImGui::End();
+	ImGui::Render();
+	ImGuiSDL::Render(ImGui::GetDrawData());
+	ImGui::StyleColorsDark();
 }

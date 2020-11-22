@@ -23,21 +23,25 @@ public:
 	virtual void clean() override;
 	virtual void handleEvents() override;
 	virtual void start() override;
+	void GUI_Function();
 private:
 	glm::vec2 m_mousePosition;
 
-	Plane* m_pPlaneSprite;
+	// Player
 	Uint32 hp_flashTimerDuration = 5000;
 	Uint32 hp_flashTimerPeriod = 1000;
 	Uint32 hp_flashTimerStart = 0;
 	Uint32 hp_flashTimer = 0;
 	int current_hp = 5;
 	Player* m_pPlayer;
-	Enemy* m_pEnemy;
 	
 	// Bullets
 	float bulletSpawnDuration = 3000.0f;
 	float bulletSpawnTimerStart;
+	int bulletPoolSize = 10;
+	float gravity = 9.8f;
+	float gravityScale = 2.0f;
+	float wind = 0.0f;
 	BulletPool* m_pBulletPool;
 	void SpawnBullet();
 

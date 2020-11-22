@@ -11,6 +11,7 @@ public:
 	Bullet* Spawn();
 	void Despawn(Bullet* bullet);
 	void Clean();
+	void Resize(size_t new_size);
 	std::vector<Bullet*> active;
 	std::vector<Bullet*> inactive;
 private:
