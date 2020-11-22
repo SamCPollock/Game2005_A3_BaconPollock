@@ -59,6 +59,11 @@ void PlayScene::update()
 		m_pPlayer->getRigidBody()->velocity.y = 0.0f;
 	}
 
+	// Handle Wind Fluctuation
+	wind += ((rand() % 1000) - 500.0f) * windFluctuation * 0.0001f;
+	if(wind < -50.0f) wind = -50.0f;
+	if(wind > 50.0f) wind = 50.0f;
+
 	// Handle bullet collisions and despawning
 	for(auto bullet : m_pBulletPool->active)
 	{
@@ -176,13 +181,12 @@ void PlayScene::GUI_Function()
 	if(ImGui::SliderFloat("Gravity", &gravity, 1.0f, 100.0f))
 	{
 		for(Bullet* bullet : m_pBulletPool->active) bullet->getRigidBody()->acceleration.y = gravity * gravityScale;
-		for(Bullet* bullet : m_pBulletPool->inactive) bullet->getRigidBody()->acceleration.y = gravity * gravityScale;
 	}
 	if(ImGui::SliderFloat("Wind", &wind, -50.0f, 50.0f))
 	{
 		for(Bullet* bullet : m_pBulletPool->active) bullet->getRigidBody()->acceleration.x = wind;
-		for(Bullet* bullet : m_pBulletPool->inactive) bullet->getRigidBody()->acceleration.x = wind;
 	}
+	if(ImGui::SliderFloat("Wind Fluctuation", &windFluctuation, 0.0f, 100.0f));
 
 	ImGui::End();
 	ImGui::Render();

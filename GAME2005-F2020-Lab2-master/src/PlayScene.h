@@ -36,12 +36,13 @@ private:
 	Player* m_pPlayer;
 	
 	// Bullets
-	float bulletSpawnDuration = 3000.0f;
+	float bulletSpawnDuration = 1000.0f;
 	float bulletSpawnTimerStart;
 	int bulletPoolSize = 10;
 	float gravity = 9.8f;
-	float gravityScale = 2.0f;
+	float gravityScale = 4.0f;
 	float wind = 0.0f;
+	float windFluctuation = 0.0f;
 	BulletPool* m_pBulletPool;
 	void SpawnBullet();
 
