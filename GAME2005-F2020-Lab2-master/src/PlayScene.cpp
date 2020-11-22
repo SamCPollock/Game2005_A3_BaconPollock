@@ -16,12 +16,45 @@ PlayScene::~PlayScene()
 void PlayScene::draw()
 {
 	TextureManager::Instance()->draw("background", 400, 300, 0, 255, true);
+	for(int hp = 0; hp < current_hp; hp++)
+	{
+		TextureManager::Instance()->draw("broom", (hp * 20) - 10, 550, 90);
+		
+		hp_flashTimer = SDL_GetTicks() - hp_flashTimerStart;
+		if(hp_flashTimer < hp_flashTimerDuration && hp_flashTimer % hp_flashTimerPeriod < 500)
+			TextureManager::Instance()->setColour("broom", 0, 0, 0);
+		else
+			TextureManager::Instance()->setColour("broom", 255, 255, 255);
+	}
 	drawDisplayList();
+
 }
 
 void PlayScene::update()
 {
 	updateDisplayList();
+
+	// Handle player bounds
+	if(m_pPlayer->getTransform()->position.x < 0.0f)
+	{
+		m_pPlayer->getTransform()->position.x = 0.0f;
+		m_pPlayer->getRigidBody()->velocity.x = 0.0f;
+	}
+	else if(m_pPlayer->getTransform()->position.x > 800.0f)
+	{
+		m_pPlayer->getTransform()->position.x = 800.0f;
+		m_pPlayer->getRigidBody()->velocity.x = 0.0f;
+	}
+	if(m_pPlayer->getTransform()->position.y < 0.0f)
+	{
+		m_pPlayer->getTransform()->position.y = 0.0f;
+		m_pPlayer->getRigidBody()->velocity.y = 0.0f;
+	}
+	else if(m_pPlayer->getTransform()->position.y > 600.0f)
+	{
+		m_pPlayer->getTransform()->position.y = 600.0f;
+		m_pPlayer->getRigidBody()->velocity.y = 0.0f;
+	}
 
 	// Handle bullet collisions and despawning
 	for(auto bullet : m_pBulletPool->active)
@@ -29,6 +62,8 @@ void PlayScene::update()
 		if(bullet->isColliding(m_pPlayer))
 		{
 			bullet->active = false;
+			--current_hp;
+			hp_flashTimerStart = SDL_GetTicks();
 			SoundManager::Instance().playSound("hit", 0, 1);
 		}
 		else if(bullet->getTransform()->position.y > 650)
@@ -85,6 +120,7 @@ void PlayScene::handleEvents()
 
 void PlayScene::start()
 {
+	TextureManager::Instance()->load("../Assets/textures/alex-miteva-flying-broom-stick2.png", "broom");
 	TextureManager::Instance()->load("../Assets/textures/Forest.jpg", "background");
 	SoundManager::Instance().load("../Assets/audio/rainhit.wav", "hit", SoundType::SOUND_SFX);
 	SoundManager::Instance().load("../Assets/audio/cubedcanada+forest.mp3", "Forest", SoundType::SOUND_MUSIC);
@@ -108,8 +144,6 @@ void PlayScene::SpawnBullet()
 {
 	Bullet* bullet = m_pBulletPool->Spawn();
 	if(bullet)
-	{
 		bullet->getTransform()->position = glm::vec2(50 + rand() % 700, 0);
-	}
 	bulletSpawnTimerStart = SDL_GetTicks();
 }

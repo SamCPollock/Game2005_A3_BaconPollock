@@ -7,6 +7,8 @@
 #include "glm/vec2.hpp"
 #include "MouseButtons.h"
 #include "GameController.h"
+#include "imgui.h"
+#include "imgui.h"
 
 /* singleton with magic static */
 class EventManager
@@ -30,11 +32,16 @@ public:
 
 	// mouse events
 	bool getMouseButton(int button_number) const;
+	bool getMouseButtonDown(int button_number) const;
+	bool getMouseButtonUp(int button_number) const;
 	glm::vec2 getMousePosition() const;
 	int getMouseWheel() const;
 
 	// gamecontroller events
 	GameController* getGameController(int controller_number);
+
+	//IMGUI
+	bool isIMGUIActive();
 	
 private:
 	// Hide Constructor and Destructor 
@@ -58,13 +65,23 @@ private:
 	// game controller functions
 	void m_initializeControllers();
 
+	// IMGUI IO
+	void m_IMGUI_Keymap();
+	
+
 	/*------- PRIVATE MEMBER VARIABLES -------*/
+
+	// IMGUI variables
+	ImGuiIO& m_io;
+	bool m_isIMGUIActive;
+
 	
 	// keyboard states array
 	const Uint8* m_keyStates;
 
 	// mouse specific
 	bool m_mouseButtons[3];
+	bool m_mouseButtonsLastFrame[3];
 	glm::vec2 m_mousePosition;
 	int m_mouseWheel;
 

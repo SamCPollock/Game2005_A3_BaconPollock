@@ -27,11 +27,16 @@ private:
 	glm::vec2 m_mousePosition;
 
 	Plane* m_pPlaneSprite;
+	Uint32 hp_flashTimerDuration = 5000;
+	Uint32 hp_flashTimerPeriod = 1000;
+	Uint32 hp_flashTimerStart = 0;
+	Uint32 hp_flashTimer = 0;
+	int current_hp = 5;
 	Player* m_pPlayer;
 	Enemy* m_pEnemy;
 	
 	// Bullets
-	const float bulletSpawnDuration = 3000.0f;
+	float bulletSpawnDuration = 3000.0f;
 	float bulletSpawnTimerStart;
 	BulletPool* m_pBulletPool;
 	void SpawnBullet();
