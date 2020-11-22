@@ -2,6 +2,7 @@
 #include "Game.h"
 #include "EventManager.h"
 //#include "CollisionManager.h"
+#include "SoundManager.h"
 #include "Util.h"
 
 PlayScene::PlayScene()
@@ -32,6 +33,7 @@ void PlayScene::update()
 		if ((*it)->isColliding(m_pPlayer))
 		{
 			std::cout << "DEBUG: THERE IS A COLLISION;\n";
+			SoundManager::Instance().playSound("melting", 0);
 		}
 		if((*it)->getTransform()->position.y >= 650)
 		{
@@ -87,6 +89,7 @@ void PlayScene::handleEvents()
 void PlayScene::start()
 {
 	TextureManager::Instance()->load("../Assets/textures/oz.png", "background");
+	SoundManager::Instance().load("../Assets/audio/I'm melting.wav", "melting", SoundType:: SOUND_SFX);
 
 	// Player Sprite
 	m_pPlayer = new Player();

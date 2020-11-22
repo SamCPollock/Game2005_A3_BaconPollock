@@ -11,6 +11,7 @@
 #include <SDL_mixer.h>
 
 /* Singleton */
+
 class SoundManager
 {
 public:
