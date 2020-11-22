@@ -29,7 +29,7 @@ void PlayScene::update()
 		if(bullet->isColliding(m_pPlayer))
 		{
 			bullet->active = false;
-			SoundManager::Instance().playSound("melting", 0, 1);
+			SoundManager::Instance().playSound("hit", 0, 1);
 		}
 		else if(bullet->getTransform()->position.y > 650)
 		{
@@ -86,7 +86,7 @@ void PlayScene::handleEvents()
 void PlayScene::start()
 {
 	TextureManager::Instance()->load("../Assets/textures/Forest.jpg", "background");
-	SoundManager::Instance().load("../Assets/audio/I'm melting.wav", "melting", SoundType::SOUND_SFX);
+	SoundManager::Instance().load("../Assets/audio/rainhit.wav", "hit", SoundType::SOUND_SFX);
 	SoundManager::Instance().load("../Assets/audio/cubedcanada+forest.mp3", "Forest", SoundType::SOUND_MUSIC);
 	SoundManager::Instance().playMusic("Forest");
 	Mix_VolumeMusic(MIX_MAX_VOLUME / 8);
