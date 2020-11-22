@@ -10,6 +10,7 @@ public:
 	BulletPool(unsigned int size);
 	Bullet* Spawn();
 	void Despawn(Bullet* bullet);
+	void Clean();
 	std::vector<Bullet*> active;
 	std::vector<Bullet*> inactive;
 private:

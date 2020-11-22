@@ -23,27 +23,24 @@ void PlayScene::update()
 {
 	updateDisplayList();
 
+	// Handle bullet collisions and despawning
+	for(auto bullet : m_pBulletPool->active)
+	{
+		if(bullet->isColliding(m_pPlayer))
+		{
+			bullet->active = false;
+			SoundManager::Instance().playSound("melting", 0, 1);
+		}
+		else if(bullet->getTransform()->position.y > 650)
+		{
+			bullet->active = false;
+		}
+	}
+	m_pBulletPool->Clean();
+
+	// Spawn new bullets
 	if(SDL_GetTicks() - bulletSpawnTimerStart >= bulletSpawnDuration)
-	{
 		SpawnBullet();
-	}
-
-	for(auto it = m_pBulletPool->active.begin(); it != m_pBulletPool->active.end(); it++)
-	{
-		if ((*it)->isColliding(m_pPlayer))
-		{
-			std::cout << "DEBUG: THERE IS A COLLISION;\n";
-			SoundManager::Instance().playSound("melting", 0);
-		}
-		if((*it)->getTransform()->position.y >= 650)
-		{
-			m_pBulletPool->Despawn(*it);
-			break;
-		}
-	}
-
-
-
 }
 
 void PlayScene::clean()
@@ -88,8 +85,11 @@ void PlayScene::handleEvents()
 
 void PlayScene::start()
 {
-	TextureManager::Instance()->load("../Assets/textures/oz.png", "background");
-	SoundManager::Instance().load("../Assets/audio/I'm melting.wav", "melting", SoundType:: SOUND_SFX);
+	TextureManager::Instance()->load("../Assets/textures/Forest.jpg", "background");
+	SoundManager::Instance().load("../Assets/audio/I'm melting.wav", "melting", SoundType::SOUND_SFX);
+	SoundManager::Instance().load("../Assets/audio/cubedcanada+forest.mp3", "Forest", SoundType::SOUND_MUSIC);
+	SoundManager::Instance().playMusic("Forest");
+	Mix_VolumeMusic(MIX_MAX_VOLUME / 8);
 
 	// Player Sprite
 	m_pPlayer = new Player();

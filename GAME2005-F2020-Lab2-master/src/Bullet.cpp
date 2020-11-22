@@ -26,7 +26,11 @@ void Bullet::reset()
 	std::cout << "DEBUG: BULLET DROPPING" << std::endl;
 }
 
-void Bullet::draw() {
+void Bullet::draw()
+{
+	if(!active)
+		return;
+
 	// alias for x and y
 	const auto x = getTransform()->position.x;
 	const auto y = getTransform()->position.y;
@@ -36,16 +40,19 @@ void Bullet::draw() {
 
 void Bullet::update()
 {
+	if(!active)
+		return;
+	
 	float deltaTime = 1.0f / 60.0f;
 	getRigidBody()->velocity += getRigidBody()->acceleration * deltaTime;
 	getTransform()->position += getRigidBody()->velocity * deltaTime;
-	if (getTransform()->position.y >= 650 || getRigidBody()->isColliding)
+	if(getTransform()->position.y >= 650 || getRigidBody()->isColliding)
 	{
 		//std::cout << "DEBUG: BULLET COLLIDING" << std::endl;
 		active = false;
 	}
 
-	if (getRigidBody()->isColliding)
+	if(getRigidBody()->isColliding)
 	{
 		std::cout << "DEBUG: BULLET COLLIDING" << std::endl;
 

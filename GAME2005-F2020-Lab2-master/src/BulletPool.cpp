@@ -12,7 +12,7 @@ BulletPool::BulletPool(unsigned int size) :
 Bullet* BulletPool::Spawn()
 {
 	Bullet* bullet = nullptr;
-	
+
 	if(inactive.size() > 0)
 	{
 		bullet = inactive.back();
@@ -35,4 +35,15 @@ void BulletPool::Despawn(Bullet* bullet)
 	inactive.push_back(bullet);
 	std::remove(active.begin(), active.end(), bullet);
 	active.erase(active.end() - 1);
+}
+
+void BulletPool::Clean()
+{
+	for(Bullet* bullet : active)
+		if(!bullet->active)
+			inactive.push_back(bullet);
+
+	active.erase(std::remove_if(active.begin(), active.end(),
+		[](const Bullet* bullet)
+		{ return bullet->active == false; }), active.end());
 }
