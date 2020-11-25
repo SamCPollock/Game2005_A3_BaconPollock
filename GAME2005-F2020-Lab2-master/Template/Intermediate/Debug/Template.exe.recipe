@@ -1,11 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project>
-  <ProjectOutputs>
-    <ProjectOutput>
-      <FullPath>C:\Users\Allarielle\source\repos\F2020\GAME2005\Game2005_A3_BaconPollock\GAME2005-F2020-Lab2-master\bin\Debug\Template.exe</FullPath>
-    </ProjectOutput>
-  </ProjectOutputs>
-  <ContentFiles />
-  <SatelliteDlls />
-  <NonRecipeFileRefs />
+  <ProjectOutputs>C:\Users\samcp\Documents\Github Stuff\Game2005_A3_BaconPollock\GAME2005-F2020-Lab2-master\bin\Debug\Template.exe</ProjectOutputs>
+  <ContentFiles></ContentFiles>
+  <SatelliteDlls></SatelliteDlls>
+  <NonRecipeFileRefs></NonRecipeFileRefs>
 </Project>
