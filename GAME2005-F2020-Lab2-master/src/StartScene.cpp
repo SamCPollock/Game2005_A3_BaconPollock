@@ -82,7 +82,7 @@ void StartScene::start()
 
 	// Brick Scene Button
 	m_pBrickSceneButton = new Button();
-	m_pBrickSceneButton->getTransform()->position = glm::vec2(400.0f, 600.0f);
+	m_pBrickSceneButton->getTransform()->position = glm::vec2(400.0f, 460.0f);
 
 	m_pBrickSceneButton->addEventListener(CLICK, [&]()-> void
 		{

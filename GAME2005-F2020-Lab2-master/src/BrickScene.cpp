@@ -25,6 +25,22 @@ void BrickScene::draw()
 
 void BrickScene::update()
 {
+	int mx, my;
+	SDL_GetGlobalMouseState(&mx, &my);
+
+	m_mousePosition = glm::vec2(mx, my);
+	//m_mousePosition = EventManager::Instance().getMousePosition();
+	
+	// Mouse Control
+	if(m_mouseMove)
+	{
+		float distance = Util::distance(m_pPlayer->getTransform()->position, m_mousePosition);
+		float velocityFactor = distance * 1.0f;
+		glm::vec2 angle = glm::vec2((m_mousePosition.x - m_pPlayer->getTransform()->position.x), (m_mousePosition.y - m_pPlayer->getTransform()->position.y));
+		angle = Util::normalize(angle);
+		m_pPlayer->getRigidBody()->velocity = angle * velocityFactor;
+	}
+
 	updateDisplayList();
 
 	// Handle player bounds
@@ -49,7 +65,7 @@ void BrickScene::update()
 		m_pPlayer->getRigidBody()->velocity.y = 0.0f;
 	}
 
-	// Handle bullet collisions and despawning
+	// Handle Ball Collisions
 	for(auto ball : m_pBallVec)
 	{
 		if(ball->active)
@@ -57,29 +73,42 @@ void BrickScene::update()
 			auto position = ball->getTransform()->position;
 			auto halfWidth = ball->getWidth() * 0.5f;
 			auto halfHeight = ball->getHeight() * 0.5f;
-			if(ball->isColliding(m_pPlayer))
-			{
-				SoundManager::Instance().playSound("hit", 0, 1);
-			}
 			if(position.y + halfHeight > m_screenHeight)
 			{
 				SoundManager::Instance().playSound("hit", 0, 1);
-				ball->collisionResponse(m_screenHeight, glm::vec2(1.0f, -1.0f), 0, 0, m_wallCollisionEnergyLossFactor);
+				ball->collisionResponse(m_screenHeight, glm::vec2(1.0f, -1.0f), 0, 0, -ball->bounciness);
+				//ball->getTransform()->position -= ball->getRigidBody()->velocity;
 			}
 			else if(position.y - halfHeight < 0.0f)
 			{
 				SoundManager::Instance().playSound("hit", 0, 1);
-				ball->collisionResponse(0.0f, glm::vec2(-1.0f, 1.0f), 0, 0, m_wallCollisionEnergyLossFactor);
+				ball->collisionResponse(0.0f, glm::vec2(1.0f, -1.0f), 0, 0, -ball->bounciness);
+				//ball->getTransform()->position -= ball->getRigidBody()->velocity;
 			}
 			if(position.x + halfWidth > m_screenWidth)
 			{
 				SoundManager::Instance().playSound("hit", 0, 1);
-				ball->collisionResponse(m_screenWidth, glm::vec2(-1.0f, 1.0f), 0, 0, m_wallCollisionEnergyLossFactor);
+				ball->collisionResponse(m_screenWidth, glm::vec2(-1.0f, 1.0f), 0, 0, -ball->bounciness);
+				//ball->getTransform()->position -= ball->getRigidBody()->velocity;
 			}
 			else if(position.x - halfWidth < 0.0f)
 			{
 				SoundManager::Instance().playSound("hit", 0, 1);
-				ball->collisionResponse(0.0f, glm::vec2(-1.0f, 1.0f), 0, 0, m_wallCollisionEnergyLossFactor);
+				ball->collisionResponse(0.0f, glm::vec2(-1.0f, 1.0f), 0, 0, -ball->bounciness);
+				//ball->getTransform()->position -= ball->getRigidBody()->velocity;
+			}
+
+			if(ball->isColliding(m_pPlayer, m_pPlayer->shape))
+			{
+				SoundManager::Instance().playSound("hit", 0, 1);
+				float ballMass = ball->mass;
+				float playerMass = m_pPlayer->mass;
+				glm::vec2 ballVelocity = ball->getRigidBody()->velocity;
+				glm::vec2 playerVelocity = m_pPlayer->getRigidBody()->velocity;
+				
+				ball->getRigidBody()->velocity = ballVelocity * ((ballMass - playerMass) / (ballMass + playerMass)) + (playerVelocity * ((2 * playerMass) / (ballMass + playerMass)));
+				m_pPlayer->getRigidBody()->velocity = ((2 * ballMass) / (ballMass + playerMass)) * ballVelocity + ((playerMass - ballMass) / (ballMass + playerMass)) * playerVelocity;
+				ball->getRigidBody()->velocity *= -ball->bounciness;
 			}
 		}
 	}
@@ -167,6 +196,15 @@ void BrickScene::GUI_Function()
 			SpawnBall();
 		while(m_pBallVec.size() > m_numberOfBalls)
 			DespawnBall();
+	}
+
+	static int numberOfSides = 3;
+	if(ImGui::SliderInt("Number of Sides", &numberOfSides, 3, 16))
+	{
+		for(auto ball : m_pBallVec)
+		{
+			ball->makePolygonal(0.0f, numberOfSides);
+		}
 	}
 
 	ImGui::End();

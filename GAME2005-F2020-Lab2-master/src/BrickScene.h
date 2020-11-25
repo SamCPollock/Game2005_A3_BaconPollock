@@ -23,6 +23,8 @@ public:
 private:
 	glm::vec2 m_mousePosition;
 
+	// Controls
+	bool m_mouseMove = true;
 
 	// Player
 	Uint32 hp_flashTimerDuration = 5000;
@@ -42,6 +44,12 @@ private:
 	int m_screenWidth = 800;
 	int m_screenHeight = 600;
 	float m_wallCollisionEnergyLossFactor = 0.9f;
+
+	// Forces
+	float gravity = 9.8f;
+	float gravityScale = 4.0f;
+	float wind = 0.0f;
+	float windFluctuation = 0.0f;
 
 	Button* m_pBackButton;
 	Button* m_pNextButton;

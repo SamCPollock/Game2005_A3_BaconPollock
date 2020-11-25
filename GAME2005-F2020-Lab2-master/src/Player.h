@@ -4,6 +4,7 @@
 
 #include "Sprite.h"
 #include "Label.h"
+#include "Ball.h"
 
 class Player final : public Sprite
 {
@@ -27,6 +28,8 @@ public:
 	bool isColliding(Sprite*);
 	float getDistance(Sprite*);
 
+	float mass = 20.0f;
+	CollisionType shape = CollisionType::Rectangle;
 private:
 	const float ACCELERATION = 10.0f;
 	glm::vec2 m_direction;

@@ -62,8 +62,9 @@ float Util::clamp01(const float value)
 */
 float Util::distance(const glm::vec2 vecA, const glm::vec2 vecB)
 {
-	// This has been removed for this exercise
-	return 0.0f;
+	float a = vecA.x - vecB.x;
+	float b = vecA.y - vecB.y;
+	return sqrt(a * a + b * b);
 }
 
 /**
