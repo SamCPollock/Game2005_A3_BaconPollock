@@ -114,6 +114,8 @@ void PlayScene::update()
 		m_pBall->getRigidBody()->velocity.x = (m_pBall->getRigidBody()->velocity.x * m_pBall->bounciness) + m_pPlayer->getRigidBody()->velocity.x;
 		m_pBall->getRigidBody()->velocity.y = (m_pBall->getRigidBody()->velocity.y * m_pBall->bounciness) + m_pPlayer->getRigidBody()->velocity.y;
 
+		m_pPlayer->getRigidBody()->velocity.x = 0;
+		m_pPlayer->getRigidBody()->velocity.y = 0;
 
 	}
 
