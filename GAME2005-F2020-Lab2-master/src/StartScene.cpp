@@ -1,4 +1,4 @@
-#include "StartScene.h"
+﻿#include "StartScene.h"
 #include <algorithm>
 #include "Game.h"
 #include "glm/gtx/string_cast.hpp"
@@ -14,6 +14,8 @@ StartScene::~StartScene()
 
 void StartScene::draw()
 {
+	TextureManager::Instance()->draw("background", 400, 300, 0, 255, true);
+
 	drawDisplayList();
 }
 
@@ -45,6 +47,8 @@ void StartScene::handleEvents()
 
 void StartScene::start()
 {
+	TextureManager::Instance()->load("../Assets/textures/Forest.jpg", "background");
+
 	const SDL_Color blue = { 0, 0, 255, 255 };
 	m_pStartLabel = new Label("ASSIGNMENT 3", "Consolas", 80, blue, glm::vec2(400.0f, 40.0f));
 	m_pStartLabel->setParent(this);
@@ -54,14 +58,16 @@ void StartScene::start()
 	m_pInstructionsLabel->setParent(this);
 	addChild(m_pInstructionsLabel);
 
+	m_pCreditsLabel = new Label("Thanks to  GabiWolf at VectorStock.com for the forest background. Thanks to SpaceHydra at OpenGameArt.com for the fantasy button art!", "Consolas", 10, blue, glm::vec2(100.0f, 520.0f));
+	m_pCreditsLabel->setParent(this);
+	addChild(m_pCreditsLabel);
 
 	m_pShip = new Ship();
 	m_pShip->getTransform()->position = glm::vec2(400.0f, 300.0f); 
 	addChild(m_pShip); 
 
 	// Rain Scene Button
-	m_pRainSceneButton = new Button();
-	m_pRainSceneButton->getTransform()->position = glm::vec2(400.0f, 400.0f);
+	m_pRainSceneButton = new Button("../Assets/textures/RainScene.png", "RainSceneButton", RAINSCENE_BUTTON, glm::vec2(300.0f, 400.0f), true);
 
 	m_pRainSceneButton->addEventListener(CLICK, [&]()-> void
 	{
@@ -81,8 +87,7 @@ void StartScene::start()
 	addChild(m_pRainSceneButton);
 
 	// Brick Scene Button
-	m_pBrickSceneButton = new Button();
-	m_pBrickSceneButton->getTransform()->position = glm::vec2(400.0f, 460.0f);
+	m_pBrickSceneButton = new Button("../Assets/textures/BrickScene.png", "BrickSceneButton", BRICKSCENE_BUTTON, glm::vec2(500.0f, 400.0f), true);
 
 	m_pBrickSceneButton->addEventListener(CLICK, [&]()-> void
 		{

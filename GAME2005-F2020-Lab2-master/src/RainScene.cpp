@@ -35,6 +35,23 @@ void RainScene::draw()
 
 void RainScene::update()
 {
+	int wx, wy, mx, my;
+	SDL_GetWindowPosition(Game::Instance()->getWindow(), &wx, &wy);
+	SDL_GetGlobalMouseState(&mx, &my);
+	mx -= wx; my -= wy;
+
+	m_mousePosition = glm::vec2(mx, my);
+
+	// Mouse Control
+	if(m_mouseMove)
+	{
+		float distance = Util::distance(m_pPlayer->getTransform()->position, m_mousePosition);
+		float velocityFactor = distance * m_mouseMoveStrength;
+		glm::vec2 angle = glm::vec2((m_mousePosition.x - m_pPlayer->getTransform()->position.x), (m_mousePosition.y - m_pPlayer->getTransform()->position.y));
+		angle = Util::normalize(angle);
+		m_pPlayer->getRigidBody()->velocity = angle * velocityFactor;
+	}
+
 	updateDisplayList();
 
 	// Handle player bounds
@@ -63,6 +80,7 @@ void RainScene::update()
 	wind += ((rand() % 1000) - 500.0f) * windFluctuation * 0.0001f;
 	if(wind < -50.0f) wind = -50.0f;
 	if(wind > 50.0f) wind = 50.0f;
+	for(Bullet* bullet : m_pBulletPool->active) bullet->getRigidBody()->acceleration.x = wind;
 
 	// Handle bullet collisions and despawning
 	for(auto bullet : m_pBulletPool->active)
@@ -137,6 +155,24 @@ void RainScene::start()
 	SoundManager::Instance().playMusic("Forest");
 	Mix_VolumeMusic(MIX_MAX_VOLUME / 8);
 
+	// Last Scene Button
+	m_pBackButton = new Button("../Assets/textures/LastScene.png", "LastSceneButton", BACK_BUTTON, glm::vec2(650.0f, 550.0f), true);
+	m_pBackButton->addEventListener(CLICK, [&]()-> void {
+		m_pBackButton->setActive(false);
+		TheGame::Instance()->changeSceneState(START_SCENE); });
+	m_pBackButton->addEventListener(MOUSE_OVER, [&]()->void { m_pBackButton->setAlpha(128); });
+	m_pBackButton->addEventListener(MOUSE_OUT, [&]()->void { m_pBackButton->setAlpha(255); });
+	addChild(m_pBackButton);
+
+	// Next Scene Button
+	m_pNextButton = new Button("../Assets/textures/NextScene.png", "NextSceneButton", NEXT_BUTTON, glm::vec2(750.0f, 550.0f), true);
+	m_pNextButton->addEventListener(CLICK, [&]()-> void {
+		m_pNextButton->setActive(false);
+		TheGame::Instance()->changeSceneState(BRICK_SCENE); });
+	m_pNextButton->addEventListener(MOUSE_OVER, [&]()->void { m_pNextButton->setAlpha(128); });
+	m_pNextButton->addEventListener(MOUSE_OUT, [&]()->void { m_pNextButton->setAlpha(255); });
+	addChild(m_pNextButton);
+
 	// Player Sprite
 	m_pPlayer = new Player();
 	addChild(m_pPlayer);
@@ -146,8 +182,6 @@ void RainScene::start()
 	{
 		addChild(bullet);
 	}
-
-	const SDL_Color blue = { 0, 0, 255, 255 };
 }
 
 
@@ -178,6 +212,15 @@ void RainScene::GUI_Function()
 		for(Bullet* bullet : m_pBulletPool->inactive) addChild(bullet);
 	}
 	if(ImGui::SliderFloat("Rain Period", &bulletSpawnDuration, 5000.0f, 100.0f));
+	
+	ImGui::Checkbox("Mouse Move", &m_mouseMove);
+	if(m_mouseMove)
+	{
+		ImGui::SameLine();
+		ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.35f);
+		ImGui::SliderFloat("Strength", &m_mouseMoveStrength, 0.1f, 10.0f);
+	}
+
 	if(ImGui::SliderFloat("Gravity", &gravity, 1.0f, 100.0f))
 	{
 		for(Bullet* bullet : m_pBulletPool->active) bullet->getRigidBody()->acceleration.y = gravity * gravityScale;

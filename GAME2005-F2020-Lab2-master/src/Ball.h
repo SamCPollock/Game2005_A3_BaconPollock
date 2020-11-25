@@ -3,6 +3,7 @@
 #define __BALL__
 #include "Sprite.h"
 #include <vector>
+#include <glm/vec4.hpp>
 
 enum class CollisionType { Circle, Rectangle, Polygonal };
 
@@ -35,6 +36,7 @@ public:
 	float mass = 10.0f;
 	CollisionType shape = CollisionType::Circle;
 	std::vector<glm::vec2> shapePoints;
+	glm::vec4 shapeColour = glm::vec4(0.25f, 1.0f, 0.25f, 1.0f);
 	bool isColliding(Sprite* pOther, CollisionType otherCollisionType);
 	float getDistance(Sprite*);
 };

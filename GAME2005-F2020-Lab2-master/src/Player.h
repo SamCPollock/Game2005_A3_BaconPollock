@@ -5,6 +5,8 @@
 #include "Sprite.h"
 #include "Label.h"
 #include "Ball.h"
+#include <glm/vec4.hpp>
+
 
 class Player final : public Sprite
 {
@@ -30,6 +32,8 @@ public:
 
 	float mass = 20.0f;
 	CollisionType shape = CollisionType::Rectangle;
+	bool visibleForceField = true;
+	glm::vec4 forceFieldColour = glm::vec4(0.25f, 1.0f, 0.25f, 1.0f);
 private:
 	const float ACCELERATION = 10.0f;
 	glm::vec2 m_direction;

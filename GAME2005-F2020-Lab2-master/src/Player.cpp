@@ -27,6 +27,28 @@ void Player::draw()
 	const auto y = getTransform()->position.y;
 
 	TextureManager::Instance()->draw("circle", x, y, 0, 255, true);
+
+	if(visibleForceField)
+	{
+		glm::vec2 offsetPosition;
+		switch(shape)
+		{
+		case CollisionType::Circle:
+			Util::DrawCircle(getTransform()->position, getHeight() * 0.5f, forceFieldColour);
+			break;
+		case CollisionType::Rectangle:
+			offsetPosition = getTransform()->position;
+			offsetPosition.x -= getWidth() * 0.5f;
+			offsetPosition.y -= getHeight() * 0.5f;
+			Util::DrawRect(offsetPosition, getWidth(), getHeight(), forceFieldColour);
+			break;
+		case CollisionType::Polygonal:
+			throw("Error, the witch knows magic, not trigonometry!");
+			break;
+		default:
+			break;
+		}
+	}
 }
 
 void Player::update()

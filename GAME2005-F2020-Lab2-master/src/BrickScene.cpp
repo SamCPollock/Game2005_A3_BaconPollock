@@ -25,21 +25,28 @@ void BrickScene::draw()
 
 void BrickScene::update()
 {
-	int mx, my;
+	int wx, wy, mx, my;
+	SDL_GetWindowPosition(Game::Instance()->getWindow(), &wx, &wy);
 	SDL_GetGlobalMouseState(&mx, &my);
+	mx -= wx; my -= wy;
 
 	m_mousePosition = glm::vec2(mx, my);
-	//m_mousePosition = EventManager::Instance().getMousePosition();
 	
 	// Mouse Control
 	if(m_mouseMove)
 	{
 		float distance = Util::distance(m_pPlayer->getTransform()->position, m_mousePosition);
-		float velocityFactor = distance * 1.0f;
+		float velocityFactor = distance * m_mouseMoveStrength;
 		glm::vec2 angle = glm::vec2((m_mousePosition.x - m_pPlayer->getTransform()->position.x), (m_mousePosition.y - m_pPlayer->getTransform()->position.y));
 		angle = Util::normalize(angle);
 		m_pPlayer->getRigidBody()->velocity = angle * velocityFactor;
 	}
+
+	// Handle Wind Fluctuation
+	wind += ((rand() % 1000) - 500.0f) * windFluctuation * 0.0001f;
+	if(wind < -50.0f) wind = -50.0f;
+	if(wind > 50.0f) wind = 50.0f;
+	for(Ball* ball : m_pBallVec) ball->getRigidBody()->acceleration.x = wind;
 
 	updateDisplayList();
 
@@ -163,6 +170,24 @@ void BrickScene::start()
 	SoundManager::Instance().playMusic("Forest");
 	Mix_VolumeMusic(MIX_MAX_VOLUME / 8);
 
+	// Last Scene Button
+	m_pBackButton = new Button("../Assets/textures/LastScene.png", "LastSceneButton", BACK_BUTTON, glm::vec2(650.0f, 550.0f), true);
+	m_pBackButton->addEventListener(CLICK, [&]()-> void {
+		m_pBackButton->setActive(false);
+		TheGame::Instance()->changeSceneState(RAIN_SCENE); });
+	m_pBackButton->addEventListener(MOUSE_OVER, [&]()->void { m_pBackButton->setAlpha(128); });
+	m_pBackButton->addEventListener(MOUSE_OUT, [&]()->void { m_pBackButton->setAlpha(255); });
+	addChild(m_pBackButton);
+
+	// Next Scene Button
+	m_pNextButton = new Button("../Assets/textures/NextScene.png", "NextSceneButton", NEXT_BUTTON, glm::vec2(750.0f, 550.0f), true);
+	m_pNextButton->addEventListener(CLICK, [&]()-> void {
+		m_pNextButton->setActive(false);
+		TheGame::Instance()->changeSceneState(START_SCENE); });
+	m_pNextButton->addEventListener(MOUSE_OVER, [&]()->void { m_pNextButton->setAlpha(128); });
+	m_pNextButton->addEventListener(MOUSE_OUT, [&]()->void { m_pNextButton->setAlpha(255); });
+	addChild(m_pNextButton);
+
 	// Player Sprite
 	m_pPlayer = new Player();
 	addChild(m_pPlayer);
@@ -190,6 +215,32 @@ void BrickScene::GUI_Function()
 	ImGui::Begin("Options", NULL, ImGuiWindowFlags_MenuBar);
 	ImGui::SetWindowSize({ 340, 0 });
 
+	static bool chaosifyPosition = true;
+	static bool chaosifyVelocity = true;
+	static int witchShape = 1;
+	static int ballShape = 0;
+	static int ballSides = 3;
+	static float ballMass = m_pBallVec.at(0)->mass;
+	static float ballHeightDefault = m_pBallVec.at(0)->getHeight();
+	static float ballWidthDefault = m_pBallVec.at(0)->getWidth();
+	static float ballHeight = ballHeightDefault;
+	static float ballWidth = ballWidthDefault;
+	static float ballAngle = 0.0f;
+
+	if(ImGui::Button("Chaosify"))
+	{
+		for(auto ball : m_pBallVec)
+		{
+			ball->active = true;
+			if(chaosifyPosition)
+				ball->getTransform()->position = glm::vec2(rand() % m_screenWidth, rand() % m_screenHeight);
+			if(chaosifyVelocity)
+				ball->getRigidBody()->velocity = glm::vec2((rand() % 100) - 50, (rand() % 100) - 50);
+		}
+	}
+	ImGui::SameLine(); if(ImGui::Checkbox("Position##ChaosityPosition", &chaosifyPosition));
+	ImGui::SameLine(); if(ImGui::Checkbox("Velocity##ChaosityVelocity", &chaosifyVelocity));
+
 	if(ImGui::SliderInt("Number of Balls", &m_numberOfBalls, 1, 100))
 	{
 		while(m_pBallVec.size() < m_numberOfBalls)
@@ -198,13 +249,95 @@ void BrickScene::GUI_Function()
 			DespawnBall();
 	}
 
-	static int numberOfSides = 3;
-	if(ImGui::SliderInt("Number of Sides", &numberOfSides, 3, 16))
+	if(ImGui::CollapsingHeader("Motion and Control Parameters"))
 	{
-		for(auto ball : m_pBallVec)
+		ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.25f);
+		if(ImGui::SliderFloat("Ball Mass", &ballMass, 1.0f, 100.0f))
+			for(auto ball : m_pBallVec) ball->mass = ballMass;
+		ImGui::SameLine();
+		ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.25f);
+		if(ImGui::SliderFloat("Witch Mass", &m_pPlayer->mass, 1.0f, 100.0f));
+
+		ImGui::Checkbox("Mouse Move", &m_mouseMove);
+		if(m_mouseMove)
 		{
-			ball->makePolygonal(0.0f, numberOfSides);
+			ImGui::SameLine();
+			ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.45f);
+			ImGui::SliderFloat("Strength", &m_mouseMoveStrength, 0.1f, 10.0f);
+
+			ImGui::TextWrapped("Please note that the witch will not significantly change her velocity in response to collision if Mouse Move is enabled.");
 		}
+	}
+
+	if(ImGui::CollapsingHeader("Shape Parameters"))
+	{
+		ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.50f);
+		if(ImGui::ColorEdit4("Witch's Shield Colour", &m_pPlayer->forceFieldColour[0], 0));
+
+		ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.50f);
+		if(ImGui::ColorEdit4("Ball Shape Colour", &m_pBallVec.at(0)->shapeColour[0], 0));
+
+		ImGui::Text("Witch's Shield Shape:");
+		ImGui::SameLine();
+		if(ImGui::RadioButton("Circle##WitchCircle", &witchShape, 0)) m_pPlayer->shape = CollisionType::Circle;
+		ImGui::SameLine();
+		if(ImGui::RadioButton("Rectangle##WitchRectangle", &witchShape, 1)) m_pPlayer->shape = CollisionType::Rectangle;
+
+		ImGui::Text("Ball Shape:");
+		ImGui::SameLine();
+		if(ImGui::RadioButton("Circle##BallCircle", &ballShape, 0))
+		{
+			for(auto ball : m_pBallVec)
+			{
+				ball->setHeight(ballHeightDefault);
+				ball->setWidth(ballWidthDefault);
+				ball->shape = CollisionType::Circle;
+			}
+		}
+		ImGui::SameLine();
+		if(ImGui::RadioButton("Rectangle##BallRectangle", &ballShape, 1))
+			for(auto ball : m_pBallVec) ball->shape = CollisionType::Rectangle;
+		ImGui::SameLine();
+		if(ImGui::RadioButton("Polygon##BallPolygon", &ballShape, 2))
+		{
+			for(auto ball : m_pBallVec)
+			{
+				ball->setHeight(ballHeight);
+				ball->setWidth(ballWidth);
+				ball->makePolygonal(ballAngle, ballSides);
+			}
+		}
+
+		if(ballShape == 2)
+		{
+			ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.15f);
+			if(ImGui::SliderInt("Sides##BallSides", &ballSides, 3, 16))
+				for(auto ball : m_pBallVec) ball->makePolygonal(ballAngle, ballSides);
+			ImGui::SameLine();
+			ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.2f);
+			if(ImGui::SliderFloat("Size##BallSize", &ballHeight, 1.0f, 100.0f))
+			{
+				for(auto ball : m_pBallVec)
+				{
+					ball->setHeight(ballHeight);
+					ball->setWidth(ballWidth);
+					ball->makePolygonal(ballAngle, ballSides);
+				}
+			}
+			ImGui::SameLine();
+			ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.2f);
+			if(ImGui::SliderFloat("Angle##BallAngle", &ballAngle, 0.0f, 359.9f))
+				for(auto ball : m_pBallVec) ball->makePolygonal(ballAngle, ballSides);
+		}
+	}
+	
+	if(ImGui::CollapsingHeader("Scene Parameters"))
+	{
+		if(ImGui::SliderFloat("Gravity", &gravity, 1.0f, 100.0f))
+			for(auto ball : m_pBallVec) ball->getRigidBody()->acceleration.y = gravity * gravityScale;
+		if(ImGui::SliderFloat("Wind", &wind, -50.0f, 50.0f))
+			for(auto ball : m_pBallVec) ball->getRigidBody()->acceleration.x = wind;
+		if(ImGui::SliderFloat("Wind Fluctuation", &windFluctuation, 0.0f, 100.0f));
 	}
 
 	ImGui::End();

@@ -26,6 +26,10 @@ public:
 	void GUI_Function();
 private:
 	glm::vec2 m_mousePosition;
+	
+	// Controls
+	bool m_mouseMove = true;
+	float m_mouseMoveStrength = 1.0f;
 
 	// Player
 	Uint32 hp_flashTimerDuration = 5000;

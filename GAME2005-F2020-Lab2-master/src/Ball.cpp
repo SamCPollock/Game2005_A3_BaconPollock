@@ -22,16 +22,26 @@ Ball::~Ball() = default;
 
 void Ball::draw()
 {
+	if(!active)
+		return;
+
 	if(shape == CollisionType::Circle)
 	{
 		TextureManager::Instance()->draw("ball", getTransform()->position.x, getTransform()->position.y, 0, 255, true);
 	}
-	// Where are our lines?
+	else if(shape == CollisionType::Rectangle)
+	{
+		auto position = getTransform()->position;
+		position.x -= getWidth() * 0.5;
+		position.y -= getHeight() * 0.5;
+		Util::DrawRect(position, getWidth(), getHeight(), shapeColour);
+	}
 	else if(shape == CollisionType::Polygonal)
 	{
+		// Where are our lines?
 		for(size_t i = 0; i < shapePoints.size() - 1; i++)
-			Util::DrawLine(getTransform()->position + shapePoints.at(i), getTransform()->position + shapePoints.at(i + 1));
-		Util::DrawLine(getTransform()->position + shapePoints.back(), getTransform()->position + shapePoints.front());
+			Util::DrawLine(getTransform()->position + shapePoints.at(i), getTransform()->position + shapePoints.at(i + 1), shapeColour);
+		Util::DrawLine(getTransform()->position + shapePoints.back(), getTransform()->position + shapePoints.front(), shapeColour);
 	}
 }
 
@@ -58,7 +68,7 @@ void Ball::makePolygonal(float startingAngle, unsigned int sides)
 	shapePoints.clear();
 	float angleIncrement = 360.0f / sides;
 	float angle;
-	float radius = getHeight() * 4.5f;
+	float radius = getHeight();
 	for(unsigned int i = 0; i < sides; i++)
 	{
 		angle = angleIncrement * i + startingAngle;
@@ -94,7 +104,7 @@ bool Ball::isColliding(Sprite* pOther, CollisionType otherCollisionType)
 	}
 	else if(shape == CollisionType::Rectangle && otherCollisionType == CollisionType::Rectangle)
 	{
-		getRigidBody()->isColliding = CollisionManager::AABBCheck(this, pOther);
+		getRigidBody()->isColliding = CollisionManager::AABBCheck(this, pOther, true);
 	}
 	else if(shape == CollisionType::Polygonal && otherCollisionType == CollisionType::Rectangle)
 	{
