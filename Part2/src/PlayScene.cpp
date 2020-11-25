@@ -170,7 +170,7 @@ void PlayScene::start()
 	TextureManager::Instance()->load("../Assets/textures/alex-miteva-flying-broom-stick2.png", "broom");
 	TextureManager::Instance()->load("../Assets/textures/Forest.jpg", "background");
 	SoundManager::Instance().load("../Assets/audio/rainhit.wav", "hit", SoundType::SOUND_SFX);
-	SoundManager::Instance().load("../Assets/audio/cubedcanada+forest.mp3", "Forest", SoundType::SOUND_MUSIC);
+	SoundManager::Instance().load("../Assets/audio/BouncingBalls.wav", "Forest", SoundType::SOUND_MUSIC);
 	SoundManager::Instance().playMusic("Forest");
 	Mix_VolumeMusic(MIX_MAX_VOLUME / 8);
 
