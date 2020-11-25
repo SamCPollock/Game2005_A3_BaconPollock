@@ -15,7 +15,8 @@
 
 // Scenes
 #include "StartScene.h"
-#include "PlayScene.h"
+#include "RainScene.h"
+#include "BrickScene.h"
 #include "EndScene.h"
 
 #include "Config.h"

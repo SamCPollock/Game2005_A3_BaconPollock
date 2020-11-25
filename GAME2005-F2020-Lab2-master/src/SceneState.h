@@ -5,7 +5,8 @@ enum SceneState
 {
 	NO_SCENE = -1,
 	START_SCENE,
-	PLAY_SCENE,
+	RAIN_SCENE,
+	BRICK_SCENE,
 	END_SCENE,
 	NUM_OF_SCENES
 };

@@ -39,7 +39,7 @@ void StartScene::handleEvents()
 
 	if(EventManager::Instance().isKeyDown(SDL_SCANCODE_1))
 	{
-		TheGame::Instance()->changeSceneState(PLAY_SCENE);
+		TheGame::Instance()->changeSceneState(RAIN_SCENE);
 	}
 }
 
@@ -59,27 +59,46 @@ void StartScene::start()
 	m_pShip->getTransform()->position = glm::vec2(400.0f, 300.0f); 
 	addChild(m_pShip); 
 
-	// Start Button
-	m_pStartButton = new Button();
-	m_pStartButton->getTransform()->position = glm::vec2(400.0f, 400.0f); 
+	// Rain Scene Button
+	m_pRainSceneButton = new Button();
+	m_pRainSceneButton->getTransform()->position = glm::vec2(400.0f, 400.0f);
 
-	m_pStartButton->addEventListener(CLICK, [&]()-> void
+	m_pRainSceneButton->addEventListener(CLICK, [&]()-> void
 	{
-		m_pStartButton->setActive(false);
-		TheGame::Instance()->changeSceneState(PLAY_SCENE);
+			m_pRainSceneButton->setActive(false);
+		TheGame::Instance()->changeSceneState(RAIN_SCENE);
 	});
 	
-	m_pStartButton->addEventListener(MOUSE_OVER, [&]()->void
+	m_pRainSceneButton->addEventListener(MOUSE_OVER, [&]()->void
 	{
-		m_pStartButton->setAlpha(128);
+			m_pRainSceneButton->setAlpha(128);
 	});
 
-	m_pStartButton->addEventListener(MOUSE_OUT, [&]()->void
+	m_pRainSceneButton->addEventListener(MOUSE_OUT, [&]()->void
 	{
-		m_pStartButton->setAlpha(255);
+			m_pRainSceneButton->setAlpha(255);
 	});
-	addChild(m_pStartButton);
+	addChild(m_pRainSceneButton);
 
-	
+	// Brick Scene Button
+	m_pBrickSceneButton = new Button();
+	m_pBrickSceneButton->getTransform()->position = glm::vec2(400.0f, 600.0f);
+
+	m_pBrickSceneButton->addEventListener(CLICK, [&]()-> void
+		{
+			m_pBrickSceneButton->setActive(false);
+			TheGame::Instance()->changeSceneState(BRICK_SCENE);
+		});
+
+	m_pBrickSceneButton->addEventListener(MOUSE_OVER, [&]()->void
+		{
+			m_pBrickSceneButton->setAlpha(128);
+		});
+
+	m_pBrickSceneButton->addEventListener(MOUSE_OUT, [&]()->void
+		{
+			m_pBrickSceneButton->setAlpha(255);
+		});
+	addChild(m_pBrickSceneButton);
 }
 
