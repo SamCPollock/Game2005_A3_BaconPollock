@@ -58,7 +58,7 @@ void StartScene::start()
 	m_pInstructionsLabel->setParent(this);
 	addChild(m_pInstructionsLabel);
 
-	m_pCreditsLabel = new Label("Thanks to  GabiWolf at VectorStock.com for the forest background. Thanks to SpaceHydra at OpenGameArt.com for the fantasy button art!", "Consolas", 10, blue, glm::vec2(100.0f, 520.0f));
+	m_pCreditsLabel = new Label("Thanks to  GabiWolf at VectorStock.com for the forest background! Thanks to SpaceHydra at OpenGameArt.com for the fantasy button art! Thanks to symphony at OpenGameArt.com for the forest music!", "Consolas", 8, blue, glm::vec2(400.0f, 590.0f));
 	m_pCreditsLabel->setParent(this);
 	addChild(m_pCreditsLabel);
 

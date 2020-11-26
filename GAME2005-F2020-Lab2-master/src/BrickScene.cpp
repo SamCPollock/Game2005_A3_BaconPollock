@@ -110,15 +110,18 @@ void BrickScene::update()
 				glm::vec2 playerVelocity = m_pPlayer->getRigidBody()->velocity;
 				
 				// Account for tunnelling
-				float deltaTime = 1.0f / 60.0f;
-				float difference = Util::magnitude(ball->getTransform()->position - m_pPlayer->getTransform()->position);
-				difference -= ball->getHeight() + m_pPlayer->getHeight();
-				glm::vec2 shiftVec = (ball->getRigidBody()->velocity + m_pPlayer->getRigidBody()->velocity) * deltaTime;
-				float xproportion = (difference / shiftVec.x);
-				float yproportion = (difference / shiftVec.y);
-				float proportion = Util::max(xproportion, yproportion) * 2.0f;
-				shiftVec.x *= proportion;
-				shiftVec.y *= proportion;
+				//float distance = ball->getDistance(m_pPlayer) - (ball->getHeight() * 0.5f) - (m_pPlayer->getHeight() * 0.5f);
+				//ball->getTransform()->position.x
+
+				//float deltaTime = 1.0f / 60.0f;
+				//float difference = Util::magnitude(ball->getTransform()->position - m_pPlayer->getTransform()->position);
+				//difference -= ball->getHeight() + m_pPlayer->getHeight();
+				//glm::vec2 shiftVec = (ball->getRigidBody()->velocity + m_pPlayer->getRigidBody()->velocity) * deltaTime;
+				//float xproportion = (difference / shiftVec.x);
+				//float yproportion = (difference / shiftVec.y);
+				//float proportion = Util::max(xproportion, yproportion) * 2.0f;
+				//shiftVec.x *= proportion;
+				//shiftVec.y *= proportion;
 
 				// Momentum transfer
 				ball->getRigidBody()->velocity = ballVelocity * ((ballMass - playerMass) / (ballMass + playerMass)) + (playerVelocity * ((2 * playerMass) / (ballMass + playerMass)));
