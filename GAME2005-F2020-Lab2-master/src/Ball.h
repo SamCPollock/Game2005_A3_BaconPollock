@@ -32,7 +32,7 @@ public:
 	void collisionResponse(float contact_bound, glm::vec2 normal, float velocity, float mass, float energyLossFactor);
 public:
 	bool active;
-	float bounciness = -0.9f;
+	float bounciness = 0.9f;
 	float mass = 10.0f;
 	CollisionType shape = CollisionType::Circle;
 	std::vector<glm::vec2> shapePoints;

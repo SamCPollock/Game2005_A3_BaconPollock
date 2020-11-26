@@ -83,26 +83,22 @@ void BrickScene::update()
 			if(position.y + halfHeight > m_screenHeight)
 			{
 				SoundManager::Instance().playSound("hit", 0, 1);
-				ball->collisionResponse(m_screenHeight, glm::vec2(1.0f, -1.0f), 0, 0, -ball->bounciness);
-				//ball->getTransform()->position -= ball->getRigidBody()->velocity;
+				ball->collisionResponse(m_screenHeight, glm::vec2(1.0f, -1.0f), 0, 0, ball->bounciness);
 			}
 			else if(position.y - halfHeight < 0.0f)
 			{
 				SoundManager::Instance().playSound("hit", 0, 1);
-				ball->collisionResponse(0.0f, glm::vec2(1.0f, -1.0f), 0, 0, -ball->bounciness);
-				//ball->getTransform()->position -= ball->getRigidBody()->velocity;
+				ball->collisionResponse(0.0f, glm::vec2(1.0f, -1.0f), 0, 0, ball->bounciness);
 			}
 			if(position.x + halfWidth > m_screenWidth)
 			{
 				SoundManager::Instance().playSound("hit", 0, 1);
-				ball->collisionResponse(m_screenWidth, glm::vec2(-1.0f, 1.0f), 0, 0, -ball->bounciness);
-				//ball->getTransform()->position -= ball->getRigidBody()->velocity;
+				ball->collisionResponse(m_screenWidth, glm::vec2(-1.0f, 1.0f), 0, 0, ball->bounciness);
 			}
 			else if(position.x - halfWidth < 0.0f)
 			{
 				SoundManager::Instance().playSound("hit", 0, 1);
-				ball->collisionResponse(0.0f, glm::vec2(-1.0f, 1.0f), 0, 0, -ball->bounciness);
-				//ball->getTransform()->position -= ball->getRigidBody()->velocity;
+				ball->collisionResponse(0.0f, glm::vec2(-1.0f, 1.0f), 0, 0, ball->bounciness);
 			}
 
 			if(ball->isColliding(m_pPlayer, m_pPlayer->shape))
@@ -113,9 +109,21 @@ void BrickScene::update()
 				glm::vec2 ballVelocity = ball->getRigidBody()->velocity;
 				glm::vec2 playerVelocity = m_pPlayer->getRigidBody()->velocity;
 				
+				// Account for tunnelling
+				float deltaTime = 1.0f / 60.0f;
+				float difference = Util::magnitude(ball->getTransform()->position - m_pPlayer->getTransform()->position);
+				difference -= ball->getHeight() + m_pPlayer->getHeight();
+				glm::vec2 shiftVec = (ball->getRigidBody()->velocity + m_pPlayer->getRigidBody()->velocity) * deltaTime;
+				float xproportion = (difference / shiftVec.x);
+				float yproportion = (difference / shiftVec.y);
+				float proportion = Util::max(xproportion, yproportion) * 2.0f;
+				shiftVec.x *= proportion;
+				shiftVec.y *= proportion;
+
+				// Momentum transfer
 				ball->getRigidBody()->velocity = ballVelocity * ((ballMass - playerMass) / (ballMass + playerMass)) + (playerVelocity * ((2 * playerMass) / (ballMass + playerMass)));
 				m_pPlayer->getRigidBody()->velocity = ((2 * ballMass) / (ballMass + playerMass)) * ballVelocity + ((playerMass - ballMass) / (ballMass + playerMass)) * playerVelocity;
-				ball->getRigidBody()->velocity *= -ball->bounciness;
+				ball->getRigidBody()->velocity *= ball->bounciness;
 			}
 		}
 	}
@@ -221,6 +229,7 @@ void BrickScene::GUI_Function()
 	static int ballShape = 0;
 	static int ballSides = 3;
 	static float ballMass = m_pBallVec.at(0)->mass;
+	static float ballBounciness = m_pBallVec.at(0)->bounciness;
 	static float ballHeightDefault = m_pBallVec.at(0)->getHeight();
 	static float ballWidthDefault = m_pBallVec.at(0)->getWidth();
 	static float ballHeight = ballHeightDefault;
@@ -252,11 +261,15 @@ void BrickScene::GUI_Function()
 	if(ImGui::CollapsingHeader("Motion and Control Parameters"))
 	{
 		ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.25f);
-		if(ImGui::SliderFloat("Ball Mass", &ballMass, 1.0f, 100.0f))
-			for(auto ball : m_pBallVec) ball->mass = ballMass;
+		if(ImGui::SliderFloat("Witch Mass", &m_pPlayer->mass, 1.0f, 100.0f));
 		ImGui::SameLine();
 		ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.25f);
-		if(ImGui::SliderFloat("Witch Mass", &m_pPlayer->mass, 1.0f, 100.0f));
+		if(ImGui::SliderFloat("Ball Mass", &ballMass, 1.0f, 100.0f))
+			for(auto ball : m_pBallVec) ball->mass = ballMass;
+		
+		ImGui::SetNextItemWidth(ImGui::GetWindowWidth() * 0.25f);
+		if(ImGui::SliderFloat("Ball Bounciness", &ballBounciness, 0.1f, 1.0f))
+			for(auto ball : m_pBallVec) ball->bounciness = ballBounciness;
 
 		ImGui::Checkbox("Mouse Move", &m_mouseMove);
 		if(m_mouseMove)

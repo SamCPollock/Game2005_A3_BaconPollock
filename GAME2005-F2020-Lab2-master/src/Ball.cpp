@@ -80,6 +80,54 @@ void Ball::makePolygonal(float startingAngle, unsigned int sides)
 
 void Ball::collisionResponse(float contact_bound, glm::vec2 normal, float velocity, float mass, float energyLossFactor)
 {
+	float deltaTime = 1.0f / 60.0f;
+	float difference;
+
+	if(normal.y > 0.0f) // Collision with vertical bound
+	{
+		// Determine the horizontal difference between the right side of the ball and the left bound
+		if(getRigidBody()->velocity.x > 0.0f)	// Ball is moving right
+		{
+			difference = getTransform()->position.x + (getWidth() * 0.5f) - contact_bound;
+		}
+		else									// Ball is moving left
+		{
+			difference = contact_bound + getTransform()->position.x - (getWidth() * 0.5f);
+		}
+		// Determine the amount along the vector of ball's velocity that is needed to move such that the difference becomes less than 0.0f;
+		// To do this, obtain the proportion of the velocity vector's x component that the difference represents.
+		// Then multiply the y component by that same proportion.
+		glm::vec2 shiftVec = getRigidBody()->velocity * deltaTime;
+		float proportion = (difference / shiftVec.x) * 1.1f;
+		shiftVec.x *= proportion;
+		shiftVec.y *= proportion;
+
+		// Shift the player along the shift vector
+		getTransform()->position -= shiftVec;
+	}
+	if(normal.x > 0.0f) // Collision with horizontal bound
+	{
+		// Determine the horizontal difference between the right side of the ball and the left bound
+		if(getRigidBody()->velocity.y > 0.0f)	// Ball is moving down
+		{
+			difference = getTransform()->position.y + (getHeight() * 0.5f) - contact_bound;
+		}
+		else									// Ball is moving up
+		{
+			difference = contact_bound + getTransform()->position.y - (getHeight() * 0.5f);
+		}
+		// Determine the amount along the vector of ball's velocity that is needed to move such that the difference becomes less than 0.0f;
+		// To do this, obtain the proportion of the velocity vector's y component that the difference represents.
+		// Then multiply the x component by that same proportion.
+		glm::vec2 shiftVec = getRigidBody()->velocity * deltaTime;
+		float proportion = (difference / shiftVec.y) * 1.1f;
+		shiftVec.x *= proportion;
+		shiftVec.y *= proportion;
+
+		// Shift the player along the shift vector
+		getTransform()->position -= shiftVec;
+	}
+
 	getRigidBody()->velocity *= energyLossFactor;
 	getRigidBody()->velocity *= normal;
 }
